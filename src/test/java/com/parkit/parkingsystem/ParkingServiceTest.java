@@ -30,11 +30,11 @@ public class ParkingServiceTest {
     private String vehicleRegNumber;
 
     @Mock
-    private static InputReaderUtil inputReaderUtil;
+    private InputReaderUtil inputReaderUtil;
     @Mock
-    private static ParkingSpotDAO parkingSpotDAO;
+    private ParkingSpotDAO parkingSpotDAO;
     @Mock
-    private static TicketDAO ticketDAO;
+    private TicketDAO ticketDAO;
 
     @Mock
     private FareCalculatorService fareCalculatorService;
@@ -44,6 +44,7 @@ public class ParkingServiceTest {
 
     @BeforeEach
     public void setUp() {
+        vehicleRegNumber = "BG-123_BG";
         MockitoAnnotations.initMocks(this);
         parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.setFareCalculatorService(fareCalculatorService);
@@ -53,6 +54,7 @@ public class ParkingServiceTest {
 
     @Test
     public void processExitingVehicleTest() throws Exception {
+
         Ticket ticket = new Ticket();
         ticket.setParkingSpot(new ParkingSpot(1, ParkingType.CAR, false));
         ticket.setInTime(new Date(System.currentTimeMillis() - (60 * 60 * 1000)));
@@ -164,7 +166,7 @@ public class ParkingServiceTest {
     }
 
 
-    // Test 4 - retourn Error fetching parking number from DB. Parking slots might be full
+    // Test 4 - retourne Error fetching parking number from DB. Parking slots might be full
     //    if(parkingNumber > 0){
     //        parkingSpot = new ParkingSpot(parkingNumber,parkingType, true);
     //    }else{
@@ -191,14 +193,15 @@ public class ParkingServiceTest {
     // Test 5 avec un mauvais argument ( Type de véhicule = 3)
     @Test
     public void testGetNextParkingNumberIfAvailableParkingNumberWrongArgument() {
-
+        // Arrange
         when(inputReaderUtil.readSelection()).thenReturn(3);
 
+        // Act
         ParkingSpot  parkingSpot = parkingService.getNextParkingNumberIfAvailable();
 
+        // Assert
         verify(inputReaderUtil, times(1)).readSelection();
-        //assertNull(parkingSpot);
-    }
+   }
 
 
     @Test

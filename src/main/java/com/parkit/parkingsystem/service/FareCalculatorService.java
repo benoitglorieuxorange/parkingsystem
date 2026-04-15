@@ -5,31 +5,43 @@ import com.parkit.parkingsystem.model.Ticket;
 
 public class FareCalculatorService {
 
-    public void calculateFare(Ticket ticket){
+    public void calculateFare(Ticket ticket) {
+        calculateFare(ticket, false);
+    }
+
+    public void calculateFare(Ticket ticket, boolean discount){
+
+        double markdown = 1.0;
+
         if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
             throw new IllegalArgumentException("Out time provided is incorrect:"+ticket.getOutTime().toString());
         }
 
-        long inHour = ticket.getInTime().getTime();
-        long outHour = ticket.getOutTime().getTime();
+        long intTimeMillis  = ticket.getInTime().getTime();
+        long outTimeMillis = ticket.getOutTime().getTime();
 
+        if (discount){
+            markdown = 0.95;
+        }
 
+        long durationInMillis  = outTimeMillis - intTimeMillis;
+        //Conversion to hour
+        double duration = (double) durationInMillis / (60 * 60 * 1000);
 
-        //TODO: Some tests are failing here. Need to check if this logic is correct
-        double duration = (double) ((outHour - inHour) / 1000) / 60 / 60;
-
-        if (duration < 0.5){
-            duration  = 0;
-;        }
+        // Duration less than 30mn
+        if (duration < 0.5) {
+            ticket.setPrice(0);
+            return;
+        }
 
 
         switch (ticket.getParkingSpot().getParkingType()){
             case CAR: {
-                ticket.setPrice(duration * Fare.CAR_RATE_PER_HOUR);
+                ticket.setPrice((duration * Fare.CAR_RATE_PER_HOUR)*markdown);
                 break;
             }
             case BIKE: {
-                ticket.setPrice(duration * Fare.BIKE_RATE_PER_HOUR);
+                ticket.setPrice((duration * Fare.BIKE_RATE_PER_HOUR)*markdown);
                 break;
             }
             default: throw new IllegalArgumentException("Unknown Parking Type");
